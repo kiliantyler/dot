@@ -10,7 +10,7 @@ before:
 
 builds:
 - id: dot
-  main: ./cmd/dot/
+  main: .
   binary: dot
   goos:
   - linux
