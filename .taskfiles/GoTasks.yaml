@@ -1,0 +1,36 @@
+version: "3"
+
+tasks:
+  release:
+    desc: Release a new version
+    cmds:
+    - goreleaser release --snapshot --clean
+
+  mod:
+    desc: Downloads and tidy Go modules
+    cmds:
+    - go mod download
+    - go mod tidy
+
+  clean:
+    desc: Cleans temp files and folders
+    cmds:
+    - rm -rf dist/
+    - rm -rf tmp/
+
+  lint:
+    desc: Runs golangci-lint
+    aliases: [l]
+    sources:
+    - './**/*.go'
+    - .golangci.yml
+    cmds:
+    - golangci-lint run
+
+  lint:fix:
+    desc: Runs golangci-lint and fixes any issues
+    sources:
+    - './**/*.go'
+    - .golangci.yml
+    cmds:
+    - golangci-lint run --fix
