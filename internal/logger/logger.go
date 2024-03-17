@@ -3,7 +3,6 @@ package logger
 import (
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/kiliantyler/dot/internal/utils"
@@ -11,51 +10,27 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-var packageLogger = log.With().Str("pkg", "logger").Logger()
-var fileLogger = packageLogger.With().Str("file", "logger.go").Logger()
-
 func init() {
-	value, exists := os.LookupEnv("VERBOSITY")
-	if exists {
-		SetupLogger(value)
-		return
-	}
-	SetupLogger("error")
+	SetupLogger()
 }
 
-// SetupLogger configures the global logging level based on the verbosity argument.
-func SetupLogger(verbosity string) {
-	funcLog := fileLogger.With().Str("func", "SetupLogger").Logger()
-	var lvl zerolog.Level
-
-	// Attempt to parse verbosity as an integer level.
-	if numLvl, err := strconv.Atoi(verbosity); err == nil {
-		// If successful, use the numeric value as the log level.
-		lvl = zerolog.Level(numLvl)
-		if lvl < zerolog.TraceLevel || lvl > zerolog.FatalLevel {
-			funcLog.Warn().Msgf("Invalid numeric log level '%s'. Defaulting to 'info'.", verbosity)
-			lvl = zerolog.InfoLevel
-		}
-	} else {
-		switch verbosity {
-		case "trace":
-			lvl = zerolog.TraceLevel
-		case "debug":
-			lvl = zerolog.DebugLevel
-		case "info":
-			lvl = zerolog.InfoLevel
-		case "warn":
-			lvl = zerolog.WarnLevel
-		case "error":
-			lvl = zerolog.ErrorLevel
-		case "fatal":
-			lvl = zerolog.FatalLevel
-		default:
-			funcLog.Warn().Msgf("Invalid log level '%s'. Defaulting to 'info'.", verbosity)
-			lvl = zerolog.InfoLevel
-		}
+func SetupLogger() {
+	verbosity := os.Getenv("VERBOSITY")
+	if verbosity == "" {
+		verbosity = "error" // Default level
 	}
-	zerolog.SetGlobalLevel(lvl)
+	setGlobalLogLevel(verbosity)
+}
+
+func setGlobalLogLevel(verbosity string) {
+	funcLog := log.With().Str("func", "setGlobalLogLevel").Logger()
+	level, err := zerolog.ParseLevel(verbosity)
+	if err != nil {
+		funcLog.Warn().Msgf("Error parsing log level: %s", err)
+		level = zerolog.ErrorLevel
+	}
+
+	zerolog.SetGlobalLevel(level)
 	output := zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: "15:04:05"}
 	output.FormatFieldName = func(i interface{}) string {
 		switch i {
@@ -71,7 +46,8 @@ func SetupLogger(verbosity string) {
 		}
 		return "[" + utils.TrimStringToLengthUTF8(i.(string), length) + "]"
 	}
-	if lvl == zerolog.TraceLevel {
+	output.FieldsExclude = []string{"func"}
+	if level == zerolog.TraceLevel {
 		output.FormatCaller = func(i interface{}) string {
 			length := 5
 			caller := strings.Split(i.(string), "/")
@@ -87,7 +63,6 @@ func SetupLogger(verbosity string) {
 			"func",
 			zerolog.MessageFieldName,
 		}
-		output.FieldsExclude = []string{"func"}
 
 		log.Logger = log.Output(output).With().Caller().Logger()
 	} else {

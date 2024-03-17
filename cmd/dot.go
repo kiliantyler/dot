@@ -20,7 +20,6 @@ It is designed to be simple and easy to use.`,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		funcLogger := log.With().Str("func", "PersistentPreRun").Logger()
 		funcLogger.Trace().Msg("Running PersistentPreRun on Root Command")
-		config.SetupConfig(cmd)
 	},
 	SilenceErrors: true,
 }

@@ -6,7 +6,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func createDirIfNotExist(dirPath string) error {
+func CreateDirIfNotExist(dirPath string) error {
 	funcLogger := log.With().Str("func", "createDirIfNotExist").Logger()
 	funcLogger.Trace().Msgf("Checking if directory exists: %s", dirPath)
 	if _, err := os.Stat(dirPath); os.IsNotExist(err) {

@@ -3,13 +3,13 @@ module github.com/kiliantyler/dot
 go 1.22.1
 
 require (
-	github.com/adrg/xdg v0.4.0
 	github.com/rs/zerolog v1.32.0
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.18.2
 )
 
 require (
+	github.com/adrg/xdg v0.4.0
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
